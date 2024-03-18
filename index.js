@@ -16,14 +16,15 @@ document.addEventListener("click", function(e){
     }
     else if (e.target.dataset.retweet){
     handleRetweet(e.target.dataset.retweet);
+    
     } 
     else if (e.target.dataset.reply){
 
-        handleReply(e.target.dataset.reply);
+    handleReply(e.target.dataset.reply);
     }
     else if (e.target.id === "tweet-btn"){
-        tweetBtnClick();
-    }
+    tweetBtnClick();
+    } 
    
 })
 
@@ -67,8 +68,8 @@ function handleRetweet(clickedTweetId){
     tweetClickedObj.retweets++;
     tweetClickedObj.isRetweeted = true ;
  }
- storingData();
-  renderTweets();
+
+renderTweets();
 }
 
 
@@ -77,12 +78,38 @@ function handleReply(clickedTweetId){
     let tweetWithReply = document.getElementById(`replies-${clickedTweetId}`)
     tweetWithReply.classList.toggle("hidden");
 
+    const tweetArea = document.getElementById("reply-tweet-area");
+    const relpyTweetBtn = document.getElementById("reply-tweet-btn");
+
+    relpyTweetBtn.addEventListener("click", function(){
+   
+    let tweetClickedObj = tweetsData.filter(tweet=>{
+        return tweet.uuid === clickedTweetId;
+     })[0]
+    console.log(typeof(tweetClickedObj.replies))
+   
+    if(tweetArea.value){
+        tweetClickedObj.replies.unshift(
+            {
+        handle: `Mona`,
+        profilePic: `images/scrimbalogo.png`,
+        tweetText: tweetArea.value,
+        }
+        )
+    };
+    
+    
+    renderTweets();
+    // tweetWithReply.classList.toggle("hidden");
+   
+});
 }
+
 
 
 // function for handling our tweet btn
 function tweetBtnClick(){
-    const tweetBtn = document.getElementById("tweet-btn");
+    // const tweetBtn = document.getElementById("tweet-btn");
     const tweetArea = document.getElementById("tweet-area");
     if(tweetArea.value){
         // unshift pushes our data to tweetsdata array but at the end
@@ -117,19 +144,28 @@ function tweetInnerhtml(){
         let newRetweetClass = tweet.isRetweeted ? "retweeted":"";
         // adding replies where there are replies in our data.
         let replyTweetHtml=[]   
-        if (tweet.replies.length >0){
-         replyTweetHtml = tweet.replies.map(reply=>{
-            return `<div class="tweet-reply">
-            <div class="tweet-inner">
-                <img src="${reply.profilePic}" class="profile-pic">
-                    <div>
-                        <p class="handle">${reply.handle}</p>
-                        <p class="tweet-text">${reply.tweetText}</p>
-                    </div>
-                </div>
-        </div>`
-        }).join("");
-    }
+        if (tweet.replies.length > 0) {
+            replyTweetHtml = tweet.replies.map((reply, index) => {
+                let replyHtml = `<div class="tweet-reply">
+                                    <div class="tweet-inner">
+                                        <img src="${reply.profilePic}" class="profile-pic">
+                                        <div>
+                                            <p class="handle">${reply.handle}</p>
+                                            <p class="tweet-text">${reply.tweetText}</p>
+                                        </div>
+                                    </div>
+                                </div>`;
+                if (index === tweet.replies.length -1) {
+                    replyHtml += `<div class="tweet-reply">
+                                    <img src="images/scrimbalogo.png" class="profile-pic">
+                                    <textarea placeholder="What's happening?" id="reply-tweet-area"></textarea>
+                                    <button id="reply-tweet-btn">Tweet</button>
+                                </div>`;
+                }
+                return replyHtml;
+            }).join("");
+        }
+    
 
 
 
@@ -164,8 +200,8 @@ function tweetInnerhtml(){
                 <div class="hidden" id="replies-${tweet.uuid}">
                     ${replyTweetHtml }
                 </div>   
-   </div>
-                 `;
+   </div>`;
+                 
     }).join("");
     return tweetArray
 
